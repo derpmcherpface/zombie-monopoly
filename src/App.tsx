@@ -3,6 +3,7 @@ import { playSound } from "./audio";
 import { createGame, gameReducer, isValidSave, playerChoices } from "./game";
 import type { GameAction, GameState } from "./types";
 import hero from "./assets/hero.png";
+import hauntedRealm from "./assets/haunted-realm-3d.png";
 
 const SAVE_KEY = "doom-and-deeds-save";
 const SETTINGS_KEY = "doom-and-deeds-settings";
@@ -73,10 +74,22 @@ function Setup({ onStart }: { onStart: (names: string[]) => void }) {
 }
 
 function Board({ state }: { state: GameState }) {
+  const currentSpace = state.board[state.players[state.currentPlayer].position];
+
   return (
-    <div className="board-wrap">
+    <div className={`board-wrap scene-${state.phase === "result" ? currentSpace.kind : "idle"}`}>
+      <div className="sky-glow sky-glow-one" />
+      <div className="sky-glow sky-glow-two" />
       <div className="board simple-board">
+        <img className="realm-art" src={hauntedRealm} alt="" />
+        <div className="realm-shade" />
+        <div className="mist mist-one" />
+        <div className="mist mist-two" />
+        <div className="fireflies" aria-hidden="true">
+          {Array.from({ length: 12 }, (_, index) => <i key={index} />)}
+        </div>
         <div className="board-center">
+          <span className="center-crown">🏰</span>
           <strong>ROUND</strong>
           <b>{state.round} / 8</b>
           <small>Most treasure wins</small>
@@ -105,7 +118,11 @@ function Board({ state }: { state: GameState }) {
               {owner && <b className="owner-flag" style={{ background: owner.color }}>{owner.token}</b>}
               <span className="tokens">
                 {players.map((player) => (
-                  <i key={player.id} style={{ background: player.color }}>
+                  <i
+                    className={player.id === state.currentPlayer ? "active-token" : ""}
+                    key={player.id}
+                    style={{ background: player.color }}
+                  >
                     {player.token}
                   </i>
                 ))}
@@ -262,6 +279,10 @@ function Game({ initial, onQuit }: { initial: GameState; onQuit: () => void }) {
           <span>⛺ +10</span>
           <span>🧟 −15</span>
           <span>🐲 −25</span>
+        </div>
+        <div className="scenery-note">
+          <span>🌙</span>
+          <p><b>8 rounds</b><br />Own land. Keep coins.</p>
         </div>
       </aside>
       <Board state={state} />
